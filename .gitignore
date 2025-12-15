@@ -34,6 +34,7 @@ venv/
 env/
 ENV/
 .env
+.env.example
 .venv
 env.bak/
 venv.bak/
