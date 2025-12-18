@@ -91,20 +91,22 @@ const Navbar = () => {
                     <FiUser className="mr-1" />
                     {user?.name?.split(" ")[0]}
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 hidden group-hover:block border border-gray-100 dark:border-gray-700">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <FiLogOut className="inline mr-2" />
-                      Logout
-                    </button>
+                  <div className="absolute right-0 pt-2 w-48 hidden group-hover:block">
+                    <div className="bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 border border-gray-100 dark:border-gray-700">
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <FiLogOut className="inline mr-2" />
+                        Logout
+                      </button>
+                    </div>
                   </div>
                 </div>
               </>

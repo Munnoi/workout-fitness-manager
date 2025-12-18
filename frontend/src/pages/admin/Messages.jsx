@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { contactAPI } from '../../services/api';
-import { FiMail, FiCheck, FiClock, FiAlertCircle, FiSend } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiMail, FiTrash2, FiMessageSquare, FiClock, FiAlertCircle, FiCheck, FiSend } from 'react-icons/fi';
+import Loading from '../../components/Loading';
 
-const AdminMessages = () => {
+const Messages = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
@@ -119,8 +120,8 @@ const AdminMessages = () => {
             </div>
 
             {loading ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <div className="p-8 text-center h-64 flex items-center justify-center">
+                <Loading />
               </div>
             ) : messages.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400 transition-colors duration-200">
@@ -258,4 +259,4 @@ const AdminMessages = () => {
   );
 };
 
-export default AdminMessages;
+export default Messages;

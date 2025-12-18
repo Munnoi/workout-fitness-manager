@@ -3,13 +3,13 @@ import { FiFacebook, FiTwitter, FiInstagram, FiYoutube } from 'react-icons/fi';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1">
             <h3 className="text-2xl font-bold text-primary mb-4">FitLife</h3>
-            <p className="text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-200">
               Your journey to a healthier lifestyle starts here. Transform your body and mind with our personalized workout plans.
             </p>
           </div>
@@ -19,22 +19,22 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white">
+                <Link to="/" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/workouts" className="text-gray-400 hover:text-white">
+                <Link to="/workouts" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   Workouts
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-gray-400 hover:text-white">
+                <Link to="/about" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-gray-400 hover:text-white">
+                <Link to="/contact" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   Contact
                 </Link>
               </li>
@@ -46,22 +46,22 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Programs</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/workouts?goal=weight_loss" className="text-gray-400 hover:text-white">
+                <Link to="/workouts?goal=weight_loss" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   Weight Loss
                 </Link>
               </li>
               <li>
-                <Link to="/workouts?goal=muscle_gain" className="text-gray-400 hover:text-white">
+                <Link to="/workouts?goal=muscle_gain" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   Muscle Building
                 </Link>
               </li>
               <li>
-                <Link to="/workouts?goal=general_fitness" className="text-gray-400 hover:text-white">
+                <Link to="/workouts?goal=general_fitness" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   General Fitness
                 </Link>
               </li>
               <li>
-                <Link to="/workouts?difficulty=beginner" className="text-gray-400 hover:text-white">
+                <Link to="/workouts?difficulty=beginner" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                   Beginner Friendly
                 </Link>
               </li>
@@ -72,26 +72,26 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Connect With Us</h4>
             <div className="flex space-x-4 mb-4">
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                 <FiFacebook size={24} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                 <FiTwitter size={24} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                 <FiInstagram size={24} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white">
+              <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors duration-200">
                 <FiYoutube size={24} />
               </a>
             </div>
-            <p className="text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 transition-colors duration-200">
               Email: support@fitlife.com
             </p>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-200 dark:border-gray-800 mt-8 pt-8 text-center text-gray-600 dark:text-gray-400 transition-colors duration-200">
           <p>&copy; {new Date().getFullYear()} FitLife Workout Planner. All rights reserved.</p>
         </div>
       </div>

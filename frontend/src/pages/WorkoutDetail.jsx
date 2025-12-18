@@ -11,7 +11,9 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiCheck,
+  FiVideo,
 } from 'react-icons/fi';
+import Loading from '../components/Loading';
 
 const WorkoutDetail = () => {
   const { id } = useParams();
@@ -69,7 +71,7 @@ const WorkoutDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loading />
       </div>
     );
   }
@@ -95,8 +97,22 @@ const WorkoutDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       {/* Hero Section */}
-      <div className="bg-linear-to-br from-primary to-emerald-800 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div
+        className={`relative text-white py-16 ${
+          !program.image ? 'bg-linear-to-br from-primary to-emerald-800' : ''
+        }`}
+        style={
+          program.image
+            ? {
+                backgroundImage: `url('${program.image}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }
+            : {}
+        }
+      >
+        {program.image && <div className="absolute inset-0 bg-black/60"></div>}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="mb-6 md:mb-0">
               <div className="flex items-center space-x-2 mb-4">
@@ -110,7 +126,18 @@ const WorkoutDetail = () => {
               <h1 className="text-4xl font-bold mb-4">{program.name}</h1>
               <p className="text-xl text-white/80 max-w-2xl">{program.description}</p>
             </div>
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex gap-4">
+              {program.media_url && (
+                <a
+                  href={program.media_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/20 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/30 transition flex items-center"
+                >
+                  <FiVideo className="mr-2" />
+                  Watch Intro
+                </a>
+              )}
               <button
                 onClick={handleEnroll}
                 disabled={enrolling}
@@ -218,6 +245,17 @@ const WorkoutDetail = () => {
                                     <span className="text-gray-700 dark:text-gray-300 transition-colors duration-200">
                                       {item.exercise?.name}
                                     </span>
+                                    {item.exercise?.media_url && (
+                                      <a
+                                        href={item.exercise.media_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="ml-2 text-gray-400 hover:text-red-500 transition-colors"
+                                        title="Watch Video"
+                                      >
+                                        <FiVideo />
+                                      </a>
+                                    )}
                                   </div>
                                   <span className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-200">
                                     {item.sets} x {item.reps}

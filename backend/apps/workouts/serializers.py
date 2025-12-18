@@ -70,7 +70,7 @@ class WorkoutProgramSerializer(serializers.ModelSerializer):
         model = WorkoutProgram
         fields = [
             'id', 'name', 'description', 'goal', 'gender_focus',
-            'difficulty', 'duration_weeks', 'days_per_week',
+            'difficulty', 'image', 'media_url', 'duration_weeks', 'days_per_week',
             'created_by', 'created_by_name', 'is_active',
             'created_at', 'days', 'total_exercises', 'enrollment_count'
         ]
@@ -93,7 +93,7 @@ class WorkoutProgramListSerializer(serializers.ModelSerializer):
         model = WorkoutProgram
         fields = [
             'id', 'name', 'description', 'goal', 'gender_focus',
-            'difficulty', 'duration_weeks', 'days_per_week',
+            'difficulty', 'image', 'media_url', 'duration_weeks', 'days_per_week',
             'is_active', 'enrollment_count'
         ]
 
@@ -108,7 +108,7 @@ class WorkoutProgramCreateSerializer(serializers.ModelSerializer):
         model = WorkoutProgram
         fields = [
             'name', 'description', 'goal', 'gender_focus',
-            'difficulty', 'duration_weeks', 'days_per_week', 'days'
+            'difficulty', 'image', 'media_url', 'duration_weeks', 'days_per_week', 'days'
         ]
 
     def create(self, validated_data):

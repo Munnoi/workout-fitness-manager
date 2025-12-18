@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { programsAPI, exercisesAPI } from '../../services/api';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiSearch } from 'react-icons/fi';
+import Loading from '../../components/Loading';
 
 const AdminPrograms = () => {
   const [programs, setPrograms] = useState([]);
@@ -179,8 +180,8 @@ const AdminPrograms = () => {
 
         {/* Programs Grid */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <div className="text-center py-12 flex justify-center">
+            <Loading />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

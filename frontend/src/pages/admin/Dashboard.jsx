@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usersAPI, programsAPI, progressAPI, contactAPI } from '../../services/api';
-import { FiUsers, FiActivity, FiTarget, FiMessageSquare, FiTrendingUp, FiPlus } from 'react-icons/fi';
+import { FiUsers, FiActivity, FiMessageSquare, FiTrendingUp, FiTarget } from 'react-icons/fi';
+import Loading from '../../components/Loading';
 
 const AdminDashboard = () => {
-  const [userStats, setUserStats] = useState(null);
+  const [userStats, setUserStats] = useState({total_users: 0, active_users: 0, total_workouts_logged: 0, total_programs: 0, active_programs: 0, total_exercises: 0, active_enrollments: 0}); //
   const [programStats, setProgramStats] = useState(null);
   const [progressStats, setProgressStats] = useState(null);
   const [contactStats, setContactStats] = useState(null);
@@ -36,8 +37,8 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center h-64">
+        <Loading />
       </div>
     );
   }

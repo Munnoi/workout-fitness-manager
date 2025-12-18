@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react';
 import { progressAPI } from '../services/api';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { FiActivity, FiTrendingUp, FiAward, FiClock, FiCalendar } from 'react-icons/fi';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { FiActivity, FiAward, FiCalendar, FiClock, FiTrendingUp } from 'react-icons/fi';
+import Loading from '../components/Loading';
+import { useAuth } from '../context/AuthContext';
 
 const Progress = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
   const [chartData, setChartData] = useState([]);
@@ -36,7 +47,7 @@ const Progress = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loading />
       </div>
     );
   }

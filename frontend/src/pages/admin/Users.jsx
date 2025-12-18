@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { usersAPI } from '../../services/api';
-import { FiSearch, FiUserX, FiUserCheck, FiTrash2, FiEye } from 'react-icons/fi';
+import { FiSearch, FiEye, FiTrash2, FiUserCheck, FiUserX } from 'react-icons/fi';
+import Loading from '../../components/Loading';
 
-const AdminUsers = () => {
+const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -97,8 +98,8 @@ const AdminUsers = () => {
             </div>
 
             {loading ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <div className="p-8 text-center h-64 flex items-center justify-center">
+                <Loading />
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400 transition-colors duration-200">No users found</div>
@@ -235,4 +236,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers;
+export default Users;

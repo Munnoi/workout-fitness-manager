@@ -109,6 +109,8 @@ class WorkoutProgram(models.Model):
         choices=Difficulty.choices,
         default=Difficulty.BEGINNER
     )
+    media_url = models.URLField(blank=True, null=True)
+    image = models.URLField(blank=True, null=True)
     duration_weeks = models.PositiveIntegerField(default=4)
     days_per_week = models.PositiveIntegerField(default=3)
     created_by = models.ForeignKey(

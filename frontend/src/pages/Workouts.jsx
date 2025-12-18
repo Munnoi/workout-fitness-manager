@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { programsAPI } from '../services/api';
 import { FiFilter, FiClock, FiUsers, FiTarget } from 'react-icons/fi';
+import Loading from '../components/Loading';
 
 const Workouts = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -175,9 +176,7 @@ const Workouts = () => {
 
         {/* Programs Grid */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
+          <Loading />
         ) : programs.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400 text-lg transition-colors duration-200">No programs found matching your criteria.</p>
@@ -196,9 +195,20 @@ const Workouts = () => {
                 to={`/workout/${program.id}`}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition-all duration-200 overflow-hidden group"
               >
-                <div className="h-48 bg-linear-to-br from-primary to-emerald-700 flex items-center justify-center">
-                  <FiTarget className="w-16 h-16 text-white/50 group-hover:scale-110 transition" />
-                </div>
+                {program.image ? (
+                  <div className="h-48 overflow-hidden relative">
+                    <img
+                      src={program.image}
+                      alt={program.name}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                  </div>
+                ) : (
+                  <div className="h-48 bg-linear-to-br from-primary to-emerald-700 flex items-center justify-center">
+                    <FiTarget className="w-16 h-16 text-white/50 group-hover:scale-110 transition" />
+                  </div>
+                )}
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span

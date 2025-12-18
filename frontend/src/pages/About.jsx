@@ -51,15 +51,16 @@ const About = () => {
       <section
         className="relative text-white py-24 md:py-32"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=1920&auto=format&fit=crop')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1552674605-5d226f5abdff?q=80&w=1920&auto=format&fit=crop')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        {/* Green Shadow Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/90 via-green-800/85 to-emerald-900/90"></div>
+        {/* Vibrant Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 via-purple-900/85 to-pink-900/80 z-10"></div>
+        <div className="absolute inset-0 bg-black/30 z-10"></div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h1
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}

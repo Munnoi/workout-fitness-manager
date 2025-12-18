@@ -24,7 +24,27 @@ const Login = () => {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.non_field_errors?.[0] || 'Invalid email or password');
+      console.error('Login error:', err);
+      const responseData = err.response?.data;
+      let errorMessage = 'Invalid email or password';
+
+      if (!err.response) {
+        errorMessage = 'Unable to connect to server. Please ensure the backend is running.';
+      } else if (responseData) {
+        if (responseData.non_field_errors) {
+          errorMessage = responseData.non_field_errors[0];
+        } else if (responseData.detail) {
+          errorMessage = responseData.detail;
+        } else {
+          // Check for field errors (e.g. email, password)
+          const firstField = Object.keys(responseData)[0];
+          if (firstField && responseData[firstField]) {
+            const fieldError = responseData[firstField];
+            errorMessage = Array.isArray(fieldError) ? fieldError[0] : fieldError;
+          }
+        }
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

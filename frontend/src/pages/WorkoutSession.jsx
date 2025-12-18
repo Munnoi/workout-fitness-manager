@@ -1,19 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { programsAPI, progressAPI } from '../services/api';
-import {
-  FiCheckCircle,
-  FiChevronLeft,
-  FiChevronRight,
-  FiClock,
-  FiRepeat,
-  FiBookOpen,
-  FiAlertCircle,
-  FiXCircle,
-} from 'react-icons/fi';
+import { FiClock, FiCheckCircle, FiSkipForward, FiRotateCw, FiSave, FiXCircle, FiBookOpen, FiAlertCircle, FiRepeat} from 'react-icons/fi';
+import Loading from '../components/Loading';
+import { useState, useEffect } from 'react';
 
 const WorkoutSession = () => {
-  const navigate = useNavigate();
+  const { id } = useParams();
   const [currentWorkout, setCurrentWorkout] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -98,7 +91,7 @@ const WorkoutSession = () => {
   if (loading && !currentWorkout) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loading />
       </div>
     );
   }
