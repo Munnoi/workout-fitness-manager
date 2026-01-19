@@ -10,6 +10,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminLogin from './pages/AdminLogin';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Workouts from './pages/Workouts';
@@ -68,6 +70,22 @@ function App() {
                 element={
                   <PublicRoute>
                     <AdminLogin />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/forgot-password"
+                element={
+                  <PublicRoute>
+                    <ForgotPassword />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/reset-password/:uidb64/:token"
+                element={
+                  <PublicRoute>
+                    <ResetPassword />
                   </PublicRoute>
                 }
               />

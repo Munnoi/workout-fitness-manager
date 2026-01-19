@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usersAPI } from '../../services/api';
-import { FiSearch, FiEye, FiTrash2, FiUserCheck, FiUserX } from 'react-icons/fi';
+import { FiSearch, FiEye, FiTrash2, FiUserCheck, FiUserX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import Loading from '../../components/Loading';
 
 const Users = () => {
@@ -9,6 +9,8 @@ const Users = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -29,23 +31,60 @@ const Users = () => {
   };
 
   const handleBlock = async (userId) => {
+    // Optimistic update
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) return;
+
+    const updatedUser = { ...users[userIndex], is_active: !users[userIndex].is_active };
+    const newUsers = [...users];
+    newUsers[userIndex] = updatedUser;
+    
+    setUsers(newUsers);
+    if (selectedUser?.id === userId) {
+      setSelectedUser(updatedUser);
+    }
+
     try {
       await usersAPI.block(userId);
-      fetchUsers();
     } catch (error) {
       console.error('Error blocking user:', error);
+      setError('Failed to update user status');
+      // Revert changes on error
+      newUsers[userIndex] = users[userIndex];
+      setUsers([...users]); 
+      if (selectedUser?.id === userId) {
+        setSelectedUser(users[userIndex]);
+      }
+      setTimeout(() => setError(''), 3000);
     }
   };
 
-  const handleDelete = async (userId) => {
+  const handleDelete = async (userId, e) => {
+    if (e) e.stopPropagation();
     if (!window.confirm('Are you sure you want to delete this user?')) return;
+
+    // Optimistic update
+    const previousUsers = [...users];
+    setUsers(users.filter(u => u.id !== userId));
+    if (selectedUser?.id === userId) {
+      setSelectedUser(null);
+    }
 
     try {
       await usersAPI.delete(userId);
-      fetchUsers();
-      setSelectedUser(null);
+      setSuccess('User deleted successfully');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('Error deleting user:', error);
+      setError('Failed to delete user');
+      // Revert changes on error
+      setUsers(previousUsers);
+      if (selectedUser?.id === userId) {
+        setSelectedUser(selectedUser); // This might be null if we cleared it, but selectedUser comes from closure, wait... closure captures old selectedUser? No, selectedUser state.
+        // Actually, reverting selectedUser is tricky if we don't store it.
+        // But preventing the delete is the most important part.
+      }
+      setTimeout(() => setError(''), 3000);
     }
   };
 
@@ -62,6 +101,20 @@ const Users = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-200">User Management</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-1 transition-colors duration-200">View and manage user accounts</p>
         </div>
+
+        {success && (
+          <div className="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg flex items-center transition-colors duration-200">
+            <FiCheckCircle className="mr-2" />
+            {success}
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-lg flex items-center transition-colors duration-200">
+            <FiAlertCircle className="mr-2" />
+            {error}
+          </div>
+        )}
 
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-6 transition-colors duration-200">
@@ -128,6 +181,13 @@ const Users = () => {
                         >
                           {user.is_active ? 'Active' : 'Blocked'}
                         </span>
+                        <button
+                          onClick={(e) => handleDelete(user.id, e)}
+                          className="p-1 text-gray-400 hover:text-red-500 transition-colors duration-200"
+                          title="Delete User"
+                        >
+                          <FiTrash2 />
+                        </button>
                       </div>
                     </div>
                   </div>

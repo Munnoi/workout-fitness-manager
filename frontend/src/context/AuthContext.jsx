@@ -85,6 +85,21 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
+  const forgotPassword = async (email) => {
+    const response = await authAPI.forgotPassword({ email });
+    return response.data;
+  };
+
+  const resetPassword = async (uidb64, token, newPassword) => {
+    const response = await authAPI.resetPassword(uidb64, token, { new_password: newPassword });
+    return response.data;
+  };
+
+  const deleteAccount = async () => {
+    await profileAPI.delete();
+    logout();
+  };
+
   const value = {
     user,
     loading,
@@ -93,6 +108,9 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    forgotPassword,
+    resetPassword,
+    deleteAccount,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     isCustomer: user?.role === 'customer',

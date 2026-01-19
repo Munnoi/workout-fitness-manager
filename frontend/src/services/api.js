@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://workout-fitness-manager.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://workout-fitness-manager.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -61,12 +61,15 @@ export const authAPI = {
   login: (data) => api.post('/auth/login/', data),
   adminLogin: (data) => api.post('/auth/admin-login/', data),
   changePassword: (data) => api.post('/auth/change-password/', data),
+  forgotPassword: (data) => api.post('/auth/forgot-password/', data),
+  resetPassword: (uidb64, token, data) => api.post(`/auth/reset-password/${uidb64}/${token}/`, data),
 };
 
 // Profile API
 export const profileAPI = {
   get: () => api.get('/profile/'),
   update: (data) => api.patch('/profile/', data),
+  delete: () => api.delete('/profile/'),
 };
 
 // Users API (Admin)

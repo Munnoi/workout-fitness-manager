@@ -383,16 +383,19 @@ const AdminExercises = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-200">
-                    Media URL (optional)
+                    YouTube Video URL (optional)
                   </label>
                   <input
                     type="url"
                     name="media_url"
                     value={formData.media_url}
                     onChange={handleChange}
-                    placeholder="https://..."
+                    placeholder="https://www.youtube.com/watch?v=..."
                     className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200"
                   />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Add a YouTube tutorial link for this exercise
+                  </p>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">

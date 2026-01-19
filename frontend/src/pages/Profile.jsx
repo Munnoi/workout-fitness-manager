@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
-import { FiUser, FiSave, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiSave, FiAlertCircle, FiCheckCircle, FiTrash2 } from 'react-icons/fi';
 
 const Profile = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, deleteAccount } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: user?.name || '',
     age: user?.age || '',
@@ -70,6 +72,17 @@ const Profile = () => {
       setError(err.response?.data?.old_password?.[0] || 'Failed to change password');
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        await deleteAccount();
+        navigate('/');
+      } catch (err) {
+        setError('Failed to delete account. Please try again.');
+      }
     }
   };
 
@@ -198,7 +211,7 @@ const Profile = () => {
         </div>
 
         {/* Password Change Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition-colors duration-200">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-8 transition-colors duration-200">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 transition-colors duration-200">Change Password</h2>
 
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -252,6 +265,22 @@ const Profile = () => {
               {passwordLoading ? 'Changing...' : 'Change Password'}
             </button>
           </form>
+        </div>
+
+        {/* Delete Account Section */}
+        <div className="bg-red-50 dark:bg-red-900/10 rounded-xl shadow p-6 border border-red-200 dark:border-red-900/50 transition-colors duration-200">
+          <h2 className="text-xl font-semibold text-red-700 dark:text-red-400 mb-2 transition-colors duration-200">Danger Zone</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 transition-colors duration-200">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+
+          <button
+            onClick={handleDeleteAccount}
+            className="flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+          >
+            <FiTrash2 className="mr-2" />
+            Delete Account
+          </button>
         </div>
       </div>
     </div>
