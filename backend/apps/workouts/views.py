@@ -223,9 +223,15 @@ class TodayWorkoutView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        day_data = ProgramDaySerializer(day).data
+        
+        # Remove hardcoded weekday if present (e.g., "Monday - Workout 1" -> "Workout 1")
+        if ' - ' in day_data['day_name']:
+            day_data['day_name'] = day_data['day_name'].split(' - ')[1]
+            
         return Response({
             'enrollment': UserEnrollmentSerializer(enrollment).data,
-            'day': ProgramDaySerializer(day).data
+            'day': day_data
         })
 
 

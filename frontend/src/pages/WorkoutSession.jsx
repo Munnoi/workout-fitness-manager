@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 
 const WorkoutSession = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { } = useParams();
   const [currentWorkout, setCurrentWorkout] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -69,10 +69,13 @@ const WorkoutSession = () => {
     }
 
     const exerciseCompletions = [];
-    Object.entries(exerciseStatus).forEach(([exerciseId, status]) => {
+    
+    // Iterate over the actual exercises to map IDs correctly
+    currentWorkout.day.exercises.forEach((item) => {
+      const status = exerciseStatus[item.id];
       if (status === 'completed' || status === 'skipped') {
         exerciseCompletions.push({
-          exercise_id: parseInt(exerciseId),
+          exercise_id: item.exercise.id,
           completed: status === 'completed',
         });
       }

@@ -244,17 +244,14 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"Created program: {program.name}"))
                 
                 # Create Program Days
-                day_names = ['Monday', 'Wednesday', 'Friday', 'Saturday']
-                
                 for week in range(1, program.duration_weeks + 1):
                     for day_num in range(1, program.days_per_week + 1):
-                         day_name = day_names[(day_num - 1) % len(day_names)]
                          
                          program_day = ProgramDay.objects.create(
                              program=program,
                              week_number=week,
                              day_number=day_num,
-                             day_name=f"{day_name} - Workout {day_num}"
+                             day_name=f"Workout {day_num}"
                          )
 
                          # Add exercises to the day
