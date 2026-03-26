@@ -71,6 +71,15 @@ class ProgramListCreateView(generics.ListCreateAPIView):
             return WorkoutProgramListSerializer
         return WorkoutProgramCreateSerializer
 
+    def get_queryset(self):
+        queryset = WorkoutProgram.objects.filter(is_active=True)
+
+        # For authenticated customers, only show programs matching their experience level.
+        if self.request.user.is_authenticated and not self.request.user.is_admin:
+            queryset = queryset.filter(difficulty=self.request.user.experience_level)
+
+        return queryset
+
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
@@ -139,6 +148,35 @@ class EnrollmentDetailView(generics.RetrieveUpdateDestroyAPIView):
 class EnrollInProgramView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @staticmethod
+    def _bootstrap_program_days(program):
+        candidate_exercises = Exercise.objects.filter(
+            is_active=True,
+            difficulty=program.difficulty
+        ).filter(gender_focus__in=['both', program.gender_focus]).order_by('name')
+
+        if not candidate_exercises.exists():
+            return False
+
+        for week in range(1, program.duration_weeks + 1):
+            for day_number in range(1, program.days_per_week + 1):
+                day = ProgramDay.objects.create(
+                    program=program,
+                    week_number=week,
+                    day_number=day_number,
+                    day_name=f'Workout {day_number}',
+                    description='Auto-generated schedule'
+                )
+
+                for order_index, exercise in enumerate(candidate_exercises, start=1):
+                    DayExercise.objects.create(
+                        day=day,
+                        exercise=exercise,
+                        order_index=order_index
+                    )
+
+        return True
+
     def post(self, request, pk):
         try:
             program = WorkoutProgram.objects.get(pk=pk, is_active=True)
@@ -147,6 +185,20 @@ class EnrollInProgramView(APIView):
                 {'error': 'Program not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+        if program.difficulty != request.user.experience_level:
+            return Response(
+                {'error': f"This program is for {program.difficulty} users. Your experience level is {request.user.experience_level}."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not ProgramDay.objects.filter(program=program).exists():
+            schedule_created = self._bootstrap_program_days(program)
+            if not schedule_created:
+                return Response(
+                    {'error': 'This program has no scheduled workout days yet. Please choose another program.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         # Check if already enrolled
         existing = UserEnrollment.objects.filter(
@@ -199,38 +251,56 @@ class TodayWorkoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        enrollment = UserEnrollment.objects.filter(
+        enrollments = UserEnrollment.objects.filter(
             user=request.user,
             status='active'
-        ).select_related('program').first()
+        ).select_related('program')
 
-        if not enrollment:
+        if not enrollments.exists():
             return Response(
                 {'message': 'No active enrollment'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Get today's workout day
-        try:
-            day = ProgramDay.objects.get(
+        selected_enrollment = None
+        selected_day = None
+
+        for enrollment in enrollments:
+            day = ProgramDay.objects.filter(
                 program=enrollment.program,
                 week_number=enrollment.current_week,
                 day_number=enrollment.current_day
-            )
-        except ProgramDay.DoesNotExist:
+            ).first()
+
+            if not day:
+                day = ProgramDay.objects.filter(
+                    program=enrollment.program
+                ).order_by('week_number', 'day_number').first()
+
+                if day:
+                    enrollment.current_week = day.week_number
+                    enrollment.current_day = day.day_number
+                    enrollment.save(update_fields=['current_week', 'current_day', 'updated_at'])
+
+            if day:
+                selected_enrollment = enrollment
+                selected_day = day
+                break
+
+        if not selected_day:
             return Response(
-                {'message': 'No workout scheduled for today'},
+                {'message': 'No workout scheduled for today. Your active program has no workout days configured.'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        day_data = ProgramDaySerializer(day).data
-        
+        day_data = ProgramDaySerializer(selected_day).data
+
         # Remove hardcoded weekday if present (e.g., "Monday - Workout 1" -> "Workout 1")
         if ' - ' in day_data['day_name']:
             day_data['day_name'] = day_data['day_name'].split(' - ')[1]
-            
+
         return Response({
-            'enrollment': UserEnrollmentSerializer(enrollment).data,
+            'enrollment': UserEnrollmentSerializer(selected_enrollment).data,
             'day': day_data
         })
 

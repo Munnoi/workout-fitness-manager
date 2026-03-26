@@ -60,3 +60,5 @@ yarn-error.log*
 # OS
 .DS_Store
 Thumbs.db
+
+DATABASE_TABLES.md

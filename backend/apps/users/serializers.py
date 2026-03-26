@@ -216,15 +216,29 @@ class UserAdminSerializer(serializers.ModelSerializer):
     Used by admin views for user management (list, update, delete users).
     """
 
+    enrolled_workouts = serializers.SerializerMethodField()
+    active_enrollments = serializers.SerializerMethodField()
+    completed_workouts = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
             'id', 'email', 'name', 'age', 'gender',
             'fitness_goal', 'experience_level', 'role',
-            'is_active', 'created_at', 'last_login'
+            'is_active', 'created_at', 'last_login',
+            'enrolled_workouts', 'active_enrollments', 'completed_workouts'
         ]
         # Admins can modify more fields, but these remain read-only
         read_only_fields = ['id', 'created_at', 'last_login']
+
+    def get_enrolled_workouts(self, obj):
+        return obj.enrollments.count()
+
+    def get_active_enrollments(self, obj):
+        return obj.enrollments.filter(status='active').count()
+
+    def get_completed_workouts(self, obj):
+        return obj.workout_history.count()
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -317,3 +331,4 @@ class ResetPasswordSerializer(serializers.Serializer):
                 'new_password_confirm': 'Passwords do not match'
             })
         return attrs
+

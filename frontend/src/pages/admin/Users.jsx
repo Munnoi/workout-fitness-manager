@@ -1,59 +1,138 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usersAPI } from '../../services/api';
-import { FiSearch, FiEye, FiTrash2, FiUserCheck, FiUserX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import {
+  FiSearch,
+  FiEye,
+  FiTrash2,
+  FiUserCheck,
+  FiUserX,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiEdit2,
+  FiSave,
+  FiX,
+} from 'react-icons/fi';
 import Loading from '../../components/Loading';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    email: '',
+    age: '',
+    gender: '',
+    fitness_goal: 'general_fitness',
+    experience_level: 'beginner',
+  });
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
     fetchUsers();
-  }, [filter]);
+  }, [fetchUsers]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
       if (filter) params.is_active = filter === 'active';
       const response = await usersAPI.list(params);
       setUsers(response.data.results || response.data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError('Failed to fetch users');
+      setTimeout(() => setError(''), 3000);
     } finally {
       setLoading(false);
+    }
+  }, [filter]);
+
+  const handleSelectUser = (user) => {
+    setSelectedUser(user);
+    setIsEditing(false);
+    setEditForm({
+      name: user.name || '',
+      email: user.email || '',
+      age: user.age || '',
+      gender: user.gender || '',
+      fitness_goal: user.fitness_goal || 'general_fitness',
+      experience_level: user.experience_level || 'beginner',
+    });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveUser = async () => {
+    if (!selectedUser) return;
+
+    setSaving(true);
+    setError('');
+
+    try {
+      const payload = {
+        ...editForm,
+        age: editForm.age === '' ? null : Number(editForm.age),
+      };
+
+      const response = await usersAPI.update(selectedUser.id, payload);
+      const updatedUser = response.data;
+
+      setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? { ...u, ...updatedUser } : u)));
+      setSelectedUser((prev) => ({ ...prev, ...updatedUser }));
+      setIsEditing(false);
+      setSuccess('User details updated successfully');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error('Error updating user:', err);
+      const apiError = err.response?.data;
+      if (apiError && typeof apiError === 'object') {
+        const firstKey = Object.keys(apiError)[0];
+        const firstValue = apiError[firstKey];
+        setError(Array.isArray(firstValue) ? firstValue[0] : firstValue);
+      } else {
+        setError('Failed to update user details');
+      }
+      setTimeout(() => setError(''), 3500);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleBlock = async (userId) => {
-    // Optimistic update
-    const userIndex = users.findIndex(u => u.id === userId);
+    const userIndex = users.findIndex((u) => u.id === userId);
     if (userIndex === -1) return;
 
-    const updatedUser = { ...users[userIndex], is_active: !users[userIndex].is_active };
+    const originalUser = users[userIndex];
+    const updatedUser = { ...originalUser, is_active: !originalUser.is_active };
+
     const newUsers = [...users];
     newUsers[userIndex] = updatedUser;
-    
     setUsers(newUsers);
+
     if (selectedUser?.id === userId) {
-      setSelectedUser(updatedUser);
+      setSelectedUser((prev) => ({ ...prev, is_active: updatedUser.is_active }));
     }
 
     try {
       await usersAPI.block(userId);
-    } catch (error) {
-      console.error('Error blocking user:', error);
+      setSuccess(`User ${updatedUser.is_active ? 'unblocked' : 'blocked'} successfully`);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error('Error blocking user:', err);
       setError('Failed to update user status');
-      // Revert changes on error
-      newUsers[userIndex] = users[userIndex];
-      setUsers([...users]); 
+      newUsers[userIndex] = originalUser;
+      setUsers([...newUsers]);
       if (selectedUser?.id === userId) {
-        setSelectedUser(users[userIndex]);
+        setSelectedUser((prev) => ({ ...prev, is_active: originalUser.is_active }));
       }
       setTimeout(() => setError(''), 3000);
     }
@@ -63,27 +142,21 @@ const Users = () => {
     if (e) e.stopPropagation();
     if (!window.confirm('Are you sure you want to delete this user?')) return;
 
-    // Optimistic update
     const previousUsers = [...users];
-    setUsers(users.filter(u => u.id !== userId));
+    setUsers(users.filter((u) => u.id !== userId));
     if (selectedUser?.id === userId) {
       setSelectedUser(null);
+      setIsEditing(false);
     }
 
     try {
       await usersAPI.delete(userId);
       setSuccess('User deleted successfully');
       setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
-      console.error('Error deleting user:', error);
+    } catch (err) {
+      console.error('Error deleting user:', err);
       setError('Failed to delete user');
-      // Revert changes on error
       setUsers(previousUsers);
-      if (selectedUser?.id === userId) {
-        setSelectedUser(selectedUser); // This might be null if we cleared it, but selectedUser comes from closure, wait... closure captures old selectedUser? No, selectedUser state.
-        // Actually, reverting selectedUser is tricky if we don't store it.
-        // But preventing the delete is the most important part.
-      }
       setTimeout(() => setError(''), 3000);
     }
   };
@@ -99,7 +172,7 @@ const Users = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-200">User Management</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-1 transition-colors duration-200">View and manage user accounts</p>
+          <p className="text-gray-600 dark:text-gray-300 mt-1 transition-colors duration-200">View, track, and edit user accounts</p>
         </div>
 
         {success && (
@@ -116,7 +189,6 @@ const Users = () => {
           </div>
         )}
 
-        {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-6 transition-colors duration-200">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -142,7 +214,6 @@ const Users = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Users List */}
           <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow transition-colors duration-200">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-200">
@@ -164,12 +235,15 @@ const Users = () => {
                     className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 ${
                       selectedUser?.id === user.id ? 'bg-primary/5 dark:bg-primary/10' : ''
                     }`}
-                    onClick={() => setSelectedUser(user)}
+                    onClick={() => handleSelectUser(user)}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-medium text-gray-900 dark:text-white transition-colors duration-200">{user.name}</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-200">{user.email}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Enrolled: {user.enrolled_workouts || 0} | Completed: {user.completed_workouts || 0}
+                        </p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span
@@ -196,7 +270,6 @@ const Users = () => {
             )}
           </div>
 
-          {/* User Details */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow transition-colors duration-200">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-200">User Details</h2>
@@ -214,46 +287,136 @@ const Users = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-200">{selectedUser.email}</p>
                 </div>
 
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400 transition-colors duration-200">Gender</span>
-                    <span className="text-gray-900 dark:text-white capitalize transition-colors duration-200">
-                      {selectedUser.gender || 'Not set'}
-                    </span>
+                <div className="grid grid-cols-3 gap-2 mb-5">
+                  <div className="rounded-lg bg-gray-50 dark:bg-gray-700/40 p-2 text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Enrolled</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{selectedUser.enrolled_workouts || 0}</p>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400 transition-colors duration-200">Age</span>
-                    <span className="text-gray-900 dark:text-white transition-colors duration-200">{selectedUser.age || 'Not set'}</span>
+                  <div className="rounded-lg bg-gray-50 dark:bg-gray-700/40 p-2 text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Active</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{selectedUser.active_enrollments || 0}</p>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400 transition-colors duration-200">Goal</span>
-                    <span className="text-gray-900 dark:text-white capitalize transition-colors duration-200">
-                      {selectedUser.fitness_goal?.replace('_', ' ') || 'Not set'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400 transition-colors duration-200">Level</span>
-                    <span className="text-gray-900 dark:text-white capitalize transition-colors duration-200">
-                      {selectedUser.experience_level || 'Not set'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400 transition-colors duration-200">Joined</span>
-                    <span className="text-gray-900 dark:text-white transition-colors duration-200">
-                      {new Date(selectedUser.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400 transition-colors duration-200">Last Login</span>
-                    <span className="text-gray-900 dark:text-white transition-colors duration-200">
-                      {selectedUser.last_login
-                        ? new Date(selectedUser.last_login).toLocaleDateString()
-                        : 'Never'}
-                    </span>
+                  <div className="rounded-lg bg-gray-50 dark:bg-gray-700/40 p-2 text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Completed</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{selectedUser.completed_workouts || 0}</p>
                   </div>
                 </div>
 
+                {isEditing ? (
+                  <div className="space-y-3 mb-6">
+                    <input
+                      name="name"
+                      value={editForm.name}
+                      onChange={handleEditChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder="Full name"
+                    />
+                    <input
+                      name="email"
+                      type="email"
+                      value={editForm.email}
+                      onChange={handleEditChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder="Email"
+                    />
+                    <input
+                      name="age"
+                      type="number"
+                      min="1"
+                      value={editForm.age}
+                      onChange={handleEditChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder="Age"
+                    />
+                    <select
+                      name="gender"
+                      value={editForm.gender}
+                      onChange={handleEditChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                    <select
+                      name="fitness_goal"
+                      value={editForm.fitness_goal}
+                      onChange={handleEditChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="weight_loss">Weight Loss</option>
+                      <option value="muscle_gain">Muscle Gain</option>
+                      <option value="general_fitness">General Fitness</option>
+                    </select>
+                    <select
+                      name="experience_level"
+                      value={editForm.experience_level}
+                      onChange={handleEditChange}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div className="space-y-3 mb-6">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Gender</span>
+                      <span className="text-gray-900 dark:text-white capitalize">{selectedUser.gender || 'Not set'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Age</span>
+                      <span className="text-gray-900 dark:text-white">{selectedUser.age || 'Not set'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Goal</span>
+                      <span className="text-gray-900 dark:text-white capitalize">{selectedUser.fitness_goal?.replace('_', ' ') || 'Not set'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Level</span>
+                      <span className="text-gray-900 dark:text-white capitalize">{selectedUser.experience_level || 'Not set'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Joined</span>
+                      <span className="text-gray-900 dark:text-white">{new Date(selectedUser.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">Last Login</span>
+                      <span className="text-gray-900 dark:text-white">{selectedUser.last_login ? new Date(selectedUser.last_login).toLocaleDateString() : 'Never'}</span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleSaveUser}
+                        disabled={saving}
+                        className="w-full flex items-center justify-center py-2 px-4 rounded-lg bg-primary text-white hover:bg-primary-dark disabled:opacity-60"
+                      >
+                        <FiSave className="mr-2" />
+                        {saving ? 'Saving...' : 'Save Changes'}
+                      </button>
+                      <button
+                        onClick={() => setIsEditing(false)}
+                        className="w-full flex items-center justify-center py-2 px-4 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      >
+                        <FiX className="mr-2" />
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="w-full flex items-center justify-center py-2 px-4 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors duration-200"
+                    >
+                      <FiEdit2 className="mr-2" />
+                      Edit Details
+                    </button>
+                  )}
+
                   <button
                     onClick={() => handleBlock(selectedUser.id)}
                     className={`w-full flex items-center justify-center py-2 px-4 rounded-lg transition-colors duration-200 ${
@@ -297,3 +460,4 @@ const Users = () => {
 };
 
 export default Users;
+

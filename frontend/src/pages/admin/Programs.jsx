@@ -18,7 +18,7 @@ const AdminPrograms = () => {
     difficulty: 'beginner',
     gender_focus: 'both',
     goal: 'general_fitness',
-    image_url: '',
+    image: '',
     exercises: [], // This will be a list of exercise IDs
   });
 
@@ -77,7 +77,7 @@ const AdminPrograms = () => {
     const selectedExercises = [];
     for (let i = 0, l = options.length; i < l; i++) {
       if (options[i].selected) {
-        selectedExercises.push(parseInt(options[i].value));
+        selectedExercises.push(options[i].value);
       }
     }
     setFormData({ ...formData, exercises: selectedExercises });
@@ -110,7 +110,7 @@ const AdminPrograms = () => {
       difficulty: program.difficulty,
       gender_focus: program.gender_focus,
       goal: program.goal,
-      image_url: program.image_url || '',
+      image: program.image || '',
       exercises: program.exercises?.map(ex => ex.id) || [], // Safely map exercises
     });
     setShowModal(true);
@@ -134,7 +134,7 @@ const AdminPrograms = () => {
       difficulty: 'beginner',
       gender_focus: 'both',
       goal: 'general_fitness',
-      image_url: '',
+      image: '',
       exercises: [],
     });
   };
@@ -347,8 +347,8 @@ const AdminPrograms = () => {
                   </label>
                   <input
                     type="url"
-                    name="image_url"
-                    value={formData.image_url}
+                    name="image"
+                    value={formData.image}
                     onChange={handleChange}
                     placeholder="https://..."
                     className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200"
@@ -404,3 +404,4 @@ const AdminPrograms = () => {
 };
 
 export default AdminPrograms;
+

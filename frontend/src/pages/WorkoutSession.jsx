@@ -36,7 +36,8 @@ const WorkoutSession = () => {
       }
     } catch (err) {
       console.error('Error fetching today\'s workout:', err);
-      setError('Failed to fetch today\'s workout. Please try again or enroll in a program.');
+      const apiMessage = err.response?.data?.message || err.response?.data?.error;
+      setError(apiMessage || 'Failed to fetch today\'s workout. Please try again or enroll in a program.');
     } finally {
       setLoading(false);
     }
@@ -402,3 +403,4 @@ const WorkoutSession = () => {
 };
 
 export default WorkoutSession;
+
